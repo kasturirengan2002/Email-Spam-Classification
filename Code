@@ -1,0 +1,46 @@
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.svm import LinearSVC
+from sklearn.metrics import accuracy_score
+
+# Step 1: Load the dataset
+# Ensure emails.csv contains two columns: 'email' and 'label' (1 for Ham, 0 for Spam)
+data = pd.read_csv('emails.csv')
+
+# Extract features and labels
+emails = data['email']  # Email content
+labels = data['label']  # Labels (1 for Ham, 0 for Spam)
+
+# Step 2: Split dataset into training and testing sets
+emails_train, emails_test, labels_train, labels_test = train_test_split(
+    emails, labels, test_size=0.2, random_state=42
+)
+
+# Step 3: Feature extraction using TfidfVectorizer
+vectorizer = TfidfVectorizer()
+X_train = vectorizer.fit_transform(emails_train)
+X_test = vectorizer.transform(emails_test)
+
+# Step 4: Train the SVM model
+svm = LinearSVC()
+svm.fit(X_train, labels_train)
+
+# Step 5: Make predictions on test data
+predictions = svm.predict(X_test)
+
+# Step 6: Evaluate the model
+accuracy = accuracy_score(labels_test, predictions)
+print(f"Accuracy: {accuracy * 100:.2f}%")
+
+# Step 7: Test on new input email
+input_mail = ["Thanks for joining CAT FACTS! With our new subscription service, we'll send you hourly updates about cats worldwide"]
+input_features = vectorizer.transform(input_mail)
+input_prediction = svm.predict(input_features)
+
+# Step 8: Print the classification result
+for i in input_prediction:
+    if i == 1:
+        print("Ham mail")
+    else:
+        print("Spam mail")
